@@ -329,7 +329,7 @@ export function Contact() {
     </motion.div>
   );
 }
-function ContactButton(props) {
+export function ContactButton(props) {
   return (
     <a
       href={props.link}

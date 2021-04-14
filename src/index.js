@@ -23,6 +23,7 @@ import Login from "./login";
 import ProjectAdd from "./projects";
 import history from "./history";
 import { useRef } from "react";
+import Links, { LinkAdd } from "./links";
 
 const project =
   "https://img.icons8.com/material-rounded/96/eeecec/folder-invoices.png";
@@ -51,6 +52,8 @@ function Paths() {
     <Router history={history}>
       <Switch>
         <Route path="/" exact component={App} />
+        <Route path="/links" exact component={Links} />
+        <Route path="/links/add" component={LinkAdd} />
         <Route
           path="/projects"
           render={(props) => <ProjectAdd msg={props.location.state} />}

@@ -68,12 +68,12 @@ export function userSignedIn() {
   });
 }
 
-export function signOut() {
+export function signOut(links) {
   firebase
     .auth()
     .signOut()
     .then(function () {
-      window.location = "/projects";
+      window.location = links ? "/links" : "/projects";
     })
     .catch(function (error) {
       console.log(error);
