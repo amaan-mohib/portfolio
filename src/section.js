@@ -363,6 +363,7 @@ function Arrow(props) {
 export function Project() {
   const [items, setItems] = useState([]);
   const [skeleton, setSkeleton] = useState(true);
+  const [count, setCount] = useState(0);
   const controls = useAnimation();
   const [ref, inView] = useInView();
   const boxVariants = {
@@ -391,6 +392,7 @@ export function Project() {
         getCollection.onSnapshot(function (querysnapShot) {
           const docs = querysnapShot.docs.map((doc) => doc.data());
           setItems(docs);
+          setCount(1);
           console.log(docs);
           if (project.scrollHeight > project.offsetHeight) {
             project.style.justifyContent = "space-between";
@@ -398,9 +400,11 @@ export function Project() {
         });
         setSkeleton(false);
       };
-      getProjects();
+      if (count === 0) {
+        getProjects();
+      }
     }, 3500);
-  }, [inView, controls]);
+  }, [inView, controls, count]);
   const cards = items.map((item) => {
     return <MyCardContent key={item.name} item={item} />;
   });
@@ -445,11 +449,27 @@ function MyCardContent(props) {
   useEffect(() => {
     const lang = document.getElementById("lang");
     lang.style.backgroundColor = props.item.language;
-    const getColor = async (img) => {
-      const result = await analyze(img, {
-        ignore: ["rgb(255,255,255)", "rgb(0,0,0)"],
-      });
-      setColor(result[0].color);
+    const getColor = async (item) => {
+      if (!item.color) {
+        const result = await analyze(item.image, {
+          ignore: ["rgb(255,255,255)", "rgb(0,0,0)"],
+        });
+        setColor(result[0].color);
+        let db = firebase.firestore();
+        let docRef = db.collection("projects").doc(item.name);
+        docRef.get().then((doc) => {
+          if (doc.exists) {
+            docRef
+              .update({
+                color: result[0].color,
+              })
+              .then(() => console.log("updated color"))
+              .catch((err) => console.error(err));
+          }
+        });
+      } else {
+        setColor(item.color);
+      }
     };
     if (props.item.img_type === "icon") {
       setIcon(
@@ -457,7 +477,7 @@ function MyCardContent(props) {
           className="icon-banner"
           style={{ backgroundImage: `url(${props.item.image})` }}></div>
       );
-      getColor(props.item.image);
+      getColor(props.item);
     } else {
       setBanner(`url(${props.item.image})`);
     }

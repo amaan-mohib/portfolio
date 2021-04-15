@@ -24,6 +24,7 @@ import ProjectAdd from "./projects";
 import history from "./history";
 import { useRef } from "react";
 import Links, { LinkAdd } from "./links";
+import NotFound from "./NotFound";
 
 const project =
   "https://img.icons8.com/material-rounded/96/eeecec/folder-invoices.png";
@@ -70,6 +71,7 @@ function Paths() {
             )
           }
         />
+        <Route path="*" component={NotFound} />
       </Switch>
     </Router>
   );

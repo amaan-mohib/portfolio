@@ -22,6 +22,7 @@ import {
   MdEdit,
   MdDelete,
   MdHome,
+  MdFolder,
 } from "react-icons/md";
 import {
   Card,
@@ -115,11 +116,8 @@ export default function ProjectAdd(props) {
     }, 3000);
     userSignedIn();
     const signout = document.getElementById("signout");
-    const home = document.getElementById("home");
     signout.onclick = () => signOut();
-    home.onclick = () => {
-      window.location = "/";
-    };
+
     //GitHub API
     const fetchRepos = async () => {
       const data = await fetch(
@@ -158,14 +156,30 @@ export default function ProjectAdd(props) {
         <nav className="navbar">
           <h1>Projects</h1>
           <div className="nav-buts">
-            <IconButton id="home" aria-label="home" color="primary">
-              <MdHome />
-            </IconButton>
             <Button id="signout" variant="contained" color="primary">
               Log out
             </Button>
           </div>
         </nav>
+        <Divider />
+        <div>
+          <Link to="/">
+            <IconButton id="home" aria-label="home" color="primary">
+              <MdHome />
+            </IconButton>
+          </Link>
+          <Link to="/links">
+            <IconButton aria-label="home" color="primary">
+              <MdLink />
+            </IconButton>
+          </Link>
+          <Link to="/projects">
+            <IconButton aria-label="home" color="primary">
+              <MdFolder />
+            </IconButton>
+          </Link>
+        </div>
+        <Divider />
         <Msg />
         <div className="sign-in-info">
           <div style={{ marginBottom: "5px" }}>Signed in as</div>

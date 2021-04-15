@@ -1,9 +1,16 @@
-import { Button, Divider, IconButton, TextField } from "@material-ui/core";
 import React, { useState } from "react";
+import { Button, Divider, IconButton, TextField } from "@material-ui/core";
 import { useEffect } from "react";
 import firebase from "firebase/app";
 import { FaGithub, FaInstagram, FaYoutube } from "react-icons/fa";
-import { MdAdd, MdArrowUpward, MdDelete, MdHome } from "react-icons/md";
+import {
+  MdAdd,
+  MdArrowUpward,
+  MdDelete,
+  MdFolder,
+  MdHome,
+  MdLink,
+} from "react-icons/md";
 import { Link } from "react-router-dom";
 import { signOut, userSignedIn } from "./firebase";
 import { ContactButton } from "./section";
@@ -23,8 +30,14 @@ export default function Links() {
     getLinks();
   }, []);
 
+  //404 bhi banana hai
   const LinkList = (props) => {
-    const [list, setList] = useState({});
+    const [list, setList] = useState({
+      title: "Loading...",
+      description: "Loading...",
+      image: "https://ssl.gstatic.com/accounts/ui/avatar_2x.png",
+      url: props.link.split("/").splice(0, 2).join("/"),
+    });
     useEffect(() => {
       const getPreviews = async (link) => {
         const data = await fetch(
@@ -35,8 +48,27 @@ export default function Links() {
         setList(items);
       };
       getPreviews(props.link);
-    }, []);
-    return <div>{`${list.title}\n${list.description}`}</div>;
+    }, [props.link]);
+    return (
+      <a
+        className="link-list"
+        href={`${list.url}`}
+        target="_blank"
+        rel="noopener noreferrer">
+        <img
+          alt={`${list.title}`}
+          className="link-list-img"
+          src={`${list.image}`}
+        />
+        <div className="link-list-div">
+          <span className="link-span link-title">{`${list.title}`}</span>
+          <span className="link-span link-desc">{`${list.description}`}</span>
+          <span className="link-span link-url">{`${
+            list.url.split("/")[2]
+          }`}</span>
+        </div>
+      </a>
+    );
   };
   return (
     <div className="link-body">
@@ -51,16 +83,15 @@ export default function Links() {
       </div>
       <div className="links">
         {links.length > 0 ? (
-          <ul className="links-ul">
+          <div className="links-ul effect-cont" style={{ padding: 0 }}>
             {links.map((data, index) => {
               return <LinkList key={index} link={data.link} />;
             })}
-          </ul>
+          </div>
         ) : (
-          <>
-            <span style={{ padding: "10px" }}>No Links Added</span>
-            <Divider />
-          </>
+          <div className="links-ul" style={{ padding: 0 }}>
+            <span style={{ padding: "10px" }}>Loading...</span>
+          </div>
         )}
       </div>
       <footer>
@@ -102,11 +133,7 @@ export function LinkAdd() {
   useEffect(() => {
     userSignedIn();
     const signout = document.getElementById("signout");
-    const home = document.getElementById("home");
     signout.onclick = () => signOut("links");
-    home.onclick = () => {
-      window.location = "/links";
-    };
     const getLinks = () => {
       let db = firebase.firestore();
       const getCollection = db.collection("links").orderBy("createdAt", "desc");
@@ -170,14 +197,29 @@ export function LinkAdd() {
         <nav className="navbar">
           <h1>Links</h1>
           <div className="nav-buts">
-            <IconButton id="home" aria-label="home" color="primary">
-              <MdHome />
-            </IconButton>
             <Button id="signout" variant="contained" color="primary">
               Log out
             </Button>
           </div>
         </nav>
+        <Divider />
+        <div>
+          <Link to="/">
+            <IconButton id="home" aria-label="home" color="primary">
+              <MdHome />
+            </IconButton>
+          </Link>
+          <Link to="/links">
+            <IconButton aria-label="home" color="primary">
+              <MdLink />
+            </IconButton>
+          </Link>
+          <Link to="/projects">
+            <IconButton aria-label="home" color="primary">
+              <MdFolder />
+            </IconButton>
+          </Link>
+        </div>
         <Divider />
         <div className="links-div">
           {links.length > 0 ? (
