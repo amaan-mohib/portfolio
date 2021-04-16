@@ -330,6 +330,7 @@ hr {
   right: 10px;
   bottom: 10px;
   border-radius: 10px;
+  z-index: 10;
   transition-duration: 0.4s;
 }
 .scroller > div {
