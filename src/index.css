@@ -745,6 +745,11 @@ footer {
   top: 10px;
   right: 10px;
 }
+@media (pointer: coarse) {
+  html {
+    scroll-snap-type: none;
+  }
+}
 @media (hover: hover) and (pointer: fine) {
   .scrollBut:hover {
     cursor: pointer;

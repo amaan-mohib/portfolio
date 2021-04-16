@@ -66,7 +66,7 @@ export function userSignedIn() {
       let a = document.createElement("button");
       a.innerHTML = "Log out";
       a.onclick = () => signOut();
-      p.innerHTML = "Access denied";
+      p.innerHTML = "Access denied  ";
       p.appendChild(a);
       whenSignedOut.appendChild(p);
     }
