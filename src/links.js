@@ -6,6 +6,7 @@ import { FaGithub, FaInstagram, FaYoutube } from "react-icons/fa";
 import {
   MdAdd,
   MdArrowUpward,
+  MdAttachment,
   MdDelete,
   MdFolder,
   MdHome,
@@ -28,24 +29,46 @@ export default function Links() {
       });
     };
     getLinks();
+    userSignedIn();
   }, []);
 
-  //404 bhi banana hai
   const LinkList = (props) => {
     const [list, setList] = useState({
       title: "Loading...",
       description: "Loading...",
       image: "https://ssl.gstatic.com/accounts/ui/avatar_2x.png",
-      url: props.link.split("/").splice(0, 2).join("/"),
+      url: props.link.link,
     });
     useEffect(() => {
       const getPreviews = async (link) => {
-        const data = await fetch(
-          `http://api.linkpreview.net/?key=19e5180309748adfceac4329e4c2e67b&q=${link}`
-        );
-        const items = await data.json();
-        console.log(items);
-        setList(items);
+        if (!link.data) {
+          const data = await fetch(
+            `http://api.linkpreview.net/?key=19e5180309748adfceac4329e4c2e67b&q=${link.link}`
+          );
+          const items = await data.json();
+          console.log(items);
+          setList(items);
+
+          let db = firebase.firestore();
+          let docRef = db.collection("links").doc(link.id);
+          docRef.get().then((doc) => {
+            if (doc.exists) {
+              docRef
+                .update({
+                  data: {
+                    title: items.title,
+                    description: items.description,
+                    image: items.image,
+                    url: items.url,
+                  },
+                })
+                .then(() => console.log("updated", link.id))
+                .catch((err) => console.error(err));
+            }
+          });
+        } else {
+          setList(link.data);
+        }
       };
       getPreviews(props.link);
     }, [props.link]);
@@ -85,7 +108,7 @@ export default function Links() {
         {links.length > 0 ? (
           <div className="links-ul effect-cont" style={{ padding: 0 }}>
             {links.map((data, index) => {
-              return <LinkList key={index} link={data.link} />;
+              return <LinkList key={index} link={data} />;
             })}
           </div>
         ) : (
@@ -120,6 +143,25 @@ export default function Links() {
           Open Portfolio
         </a>
       </footer>
+      <div id="signed-in" className="nav-float" style={{ display: "none" }}>
+        <Link to="/">
+          <IconButton aria-label="home" color="primary">
+            <MdHome />
+          </IconButton>
+        </Link>
+        <Link to="/projects">
+          <IconButton aria-label="home" color="primary">
+            <MdFolder />
+          </IconButton>
+        </Link>
+
+        <Link to="/links/add">
+          <IconButton aria-label="home" color="primary">
+            <MdAttachment />
+          </IconButton>
+        </Link>
+      </div>
+      <div id="signed-out" style={{ display: "none" }}></div>
     </div>
   );
 }

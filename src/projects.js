@@ -22,7 +22,7 @@ import {
   MdEdit,
   MdDelete,
   MdHome,
-  MdFolder,
+  MdAttachment,
 } from "react-icons/md";
 import {
   Card,
@@ -173,9 +173,9 @@ export default function ProjectAdd(props) {
               <MdLink />
             </IconButton>
           </Link>
-          <Link to="/projects">
+          <Link to="/links/add">
             <IconButton aria-label="home" color="primary">
-              <MdFolder />
+              <MdAttachment />
             </IconButton>
           </Link>
         </div>
@@ -374,6 +374,7 @@ function Add(props) {
       } else {
         docRef
           .set({
+            id: item.name,
             name: item.name,
             description: item.description,
             html_url: item.html_url,
@@ -441,7 +442,7 @@ function Edit(props) {
   //Remove Project
   const removeProject = (item) => {
     let db = firebase.firestore();
-    let docRef = db.collection("projects").doc(`${item.name}`);
+    let docRef = db.collection("projects").doc(`${item.id}`);
     setName(`${item.name}`);
     docRef
       .delete()
@@ -528,6 +529,7 @@ const Form = forwardRef((props, ref) => {
 
     docRef
       .set({
+        id: item.name,
         name: value.name,
         description: value.desc,
         html_url: value.link,

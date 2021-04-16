@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
+import { Helmet } from "react-helmet";
 import {
   BrowserRouter as Router,
+  Link,
   Redirect,
   Route,
   Switch,
 } from "react-router-dom";
 import firebase from "firebase/app";
-import firebaseInit from "./firebase";
+import firebaseInit, { userSignedIn } from "./firebase";
 import "./index.css";
 import logo from "./logo_white_bold.png";
 import * as serviceWorker from "./serviceWorker";
@@ -25,6 +27,8 @@ import history from "./history";
 import { useRef } from "react";
 import Links, { LinkAdd } from "./links";
 import NotFound from "./NotFound";
+import { MdAttachment, MdFolder, MdLink } from "react-icons/md";
+import { IconButton } from "@material-ui/core";
 
 const project =
   "https://img.icons8.com/material-rounded/96/eeecec/folder-invoices.png";
@@ -49,21 +53,68 @@ function Paths() {
       });
     }, 1000);
   }, []);
+
+  const TitleComp = ({ title, desc }) => {
+    const defaultTitle = "Amaan Mohib";
+    const defaultDesc = "Amaan Mohib's personal website.";
+    return (
+      <Helmet>
+        <title>{title ? `${defaultTitle} - ${title}` : defaultTitle}</title>
+        <meta
+          name="description"
+          content={desc ? desc : defaultDesc}
+          data-react-helmet="true"
+        />
+      </Helmet>
+    );
+  };
+
+  const withTitle = ({ ChildComp, title, desc }) => (props) => (
+    <>
+      <TitleComp title={title} desc={desc} />
+      <ChildComp {...props} />
+    </>
+  );
+  const LinksComp = withTitle({
+    ChildComp: Links,
+    desc: "Links shared by Amaan Mohib",
+    title: "Links",
+  });
+  const LinkAddComp = withTitle({
+    ChildComp: LinkAdd,
+    desc: "Add links to be shared by Amaan Mohib",
+    title: "Add Links",
+  });
+  const ProjectsComp = withTitle({
+    ChildComp: ProjectAdd,
+    desc: "Projects to be added for portfolio",
+    title: "Projects",
+  });
+  const LoginComp = withTitle({
+    ChildComp: Login,
+    desc: "Login",
+    title: "Login",
+  });
+  const NFComp = withTitle({
+    ChildComp: NotFound,
+    desc: "404. Not Found",
+    title: "Not Found",
+  });
   return (
     <Router history={history}>
       <Switch>
         <Route path="/" exact component={App} />
-        <Route path="/links" exact component={Links} />
-        <Route path="/links/add" component={LinkAdd} />
+        <Route path="/links" exact component={LinksComp} />
+        <Route path="/links/add" component={LinkAddComp} />
         <Route
           path="/projects"
-          render={(props) => <ProjectAdd msg={props.location.state} />}
+          render={(props) => <ProjectsComp msg={props.location.state} />}
         />
         <Route
           path="/login"
           render={() =>
             !signIn ? (
-              <Login />
+              <LoginComp />
             ) : (
               <Redirect
                 to={{ pathname: "/projects", state: "Already logged in" }}
@@ -71,7 +122,7 @@ function Paths() {
             )
           }
         />
-        <Route path="*" component={NotFound} />
+        <Route path="*" component={NFComp} />
       </Switch>
     </Router>
   );
@@ -129,6 +180,9 @@ function App() {
       },
       true
     );
+    setTimeout(() => {
+      userSignedIn();
+    }, 1000);
   }, []);
 
   return (
@@ -158,6 +212,24 @@ function App() {
         content={<Contact />}
       />
       <Scroll num={num} />
+      <div id="signed-in" className="nav-float" style={{ display: "none" }}>
+        <Link to="/projects">
+          <IconButton aria-label="home" color="primary">
+            <MdFolder />
+          </IconButton>
+        </Link>
+        <Link to="/links">
+          <IconButton aria-label="home" color="primary">
+            <MdLink />
+          </IconButton>
+        </Link>
+        <Link to="/links/add">
+          <IconButton aria-label="home" color="primary">
+            <MdAttachment />
+          </IconButton>
+        </Link>
+      </div>
+      <div id="signed-out" style={{ display: "none" }}></div>
     </div>
   );
 }

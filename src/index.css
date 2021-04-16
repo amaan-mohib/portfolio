@@ -733,6 +733,15 @@ footer {
 .nf404-p {
   color: rgb(202, 202, 202);
 }
+.nav-float {
+  flex-direction: column;
+  background-color: #ffffffaf;
+  backdrop-filter: blur(10px);
+  border-radius: 10px;
+  position: fixed;
+  top: 10px;
+  right: 10px;
+}
 @media (hover: hover) and (pointer: fine) {
   .scrollBut:hover {
     cursor: pointer;

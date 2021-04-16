@@ -61,7 +61,12 @@ export function userSignedIn() {
   const whenSignedIn = document.getElementById("signed-in");
   const whenSignedOut = document.getElementById("signed-out");
   auth.onAuthStateChanged((user) => {
-    if (user) {
+    if (user && user.uid !== "o8QjLkHfRpThLB3uqXa6drSW7MA2") {
+      let p = document.createElement("p");
+      p.innerHTML = "Access denied";
+      whenSignedOut.appendChild(p);
+    }
+    if (user && user.uid === "o8QjLkHfRpThLB3uqXa6drSW7MA2") {
       whenSignedIn.style.display = "flex";
       whenSignedOut.style.display = "none";
     }

@@ -456,7 +456,7 @@ function MyCardContent(props) {
         });
         setColor(result[0].color);
         let db = firebase.firestore();
-        let docRef = db.collection("projects").doc(item.name);
+        let docRef = db.collection("projects").doc(item.id || item.name);
         docRef.get().then((doc) => {
           if (doc.exists) {
             docRef
