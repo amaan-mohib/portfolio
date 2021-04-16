@@ -63,7 +63,11 @@ export function userSignedIn() {
   auth.onAuthStateChanged((user) => {
     if (user && user.uid !== "o8QjLkHfRpThLB3uqXa6drSW7MA2") {
       let p = document.createElement("p");
+      let a = document.createElement("button");
+      a.innerHTML = "Log out";
+      a.onclick = () => signOut();
       p.innerHTML = "Access denied";
+      p.appendChild(a);
       whenSignedOut.appendChild(p);
     }
     if (user && user.uid === "o8QjLkHfRpThLB3uqXa6drSW7MA2") {
