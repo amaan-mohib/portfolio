@@ -43,7 +43,7 @@ export default function Links() {
       const getPreviews = async (link) => {
         if (!link.data) {
           const data = await fetch(
-            `http://api.linkpreview.net/?key=19e5180309748adfceac4329e4c2e67b&q=${link.link}`
+            `https://api.linkpreview.net/?key=19e5180309748adfceac4329e4c2e67b&q=${link.link}`
           );
           const items = await data.json();
           console.log(items);
@@ -106,7 +106,7 @@ export default function Links() {
       </div>
       <div className="links">
         {links.length > 0 ? (
-          <div className="links-ul effect-cont" style={{ padding: 0 }}>
+          <div className="links-ul" style={{ padding: 0 }}>
             {links.map((data, index) => {
               return <LinkList key={index} link={data} />;
             })}

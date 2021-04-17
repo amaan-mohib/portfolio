@@ -63,12 +63,12 @@ export function userSignedIn() {
   auth.onAuthStateChanged((user) => {
     if (user && user.uid !== "o8QjLkHfRpThLB3uqXa6drSW7MA2") {
       let p = document.createElement("p");
-      let a = document.createElement("button");
-      a.innerHTML = "Log out";
-      a.onclick = () => signOut();
-      p.innerHTML = "Access denied  ";
-      p.appendChild(a);
+      p.innerHTML = "Access denied  (Logging out in 3 seconds)";
       whenSignedOut.appendChild(p);
+      setTimeout(() => {
+        whenSignedOut.removeChild(p);
+        signOut();
+      }, 3000);
     }
     if (user && user.uid === "o8QjLkHfRpThLB3uqXa6drSW7MA2") {
       whenSignedIn.style.display = "flex";
