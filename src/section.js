@@ -378,6 +378,7 @@ export function Project() {
     },
   };
   useEffect(() => {
+    let unsub;
     if (inView) {
       controls.start("visible");
     } else {
@@ -389,7 +390,7 @@ export function Project() {
       const getProjects = () => {
         let db = firebase.firestore();
         const getCollection = db.collection("projects");
-        getCollection.onSnapshot(function (querysnapShot) {
+        unsub = getCollection.onSnapshot(function (querysnapShot) {
           const docs = querysnapShot.docs.map((doc) => doc.data());
           setItems(docs);
           setCount(1);
@@ -404,6 +405,9 @@ export function Project() {
         getProjects();
       }
     }, 3500);
+    return () => {
+      unsub && unsub();
+    };
   }, [inView, controls, count]);
   const cards = items.map((item) => {
     return <MyCardContent key={item.name} item={item} />;

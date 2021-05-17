@@ -19,17 +19,17 @@ import { ContactButton } from "./section";
 export default function Links() {
   const [links, setLinks] = useState([]);
   useEffect(() => {
-    const getLinks = () => {
-      let db = firebase.firestore();
-      const getCollection = db.collection("links").orderBy("createdAt", "desc");
-      getCollection.onSnapshot(function (querysnapShot) {
-        const docs = querysnapShot.docs.map((doc) => doc.data());
-        setLinks(docs);
-        console.log(docs);
-      });
-    };
-    getLinks();
+    let db = firebase.firestore();
+    const getCollection = db.collection("links").orderBy("createdAt", "desc");
+    let unsub = getCollection.onSnapshot(function (querysnapShot) {
+      const docs = querysnapShot.docs.map((doc) => doc.data());
+      setLinks(docs);
+      console.log(docs);
+    });
     userSignedIn();
+    return () => {
+      unsub();
+    };
   }, []);
 
   const LinkList = (props) => {
@@ -176,16 +176,17 @@ export function LinkAdd() {
     userSignedIn();
     const signout = document.getElementById("signout");
     signout.onclick = () => signOut("links");
-    const getLinks = () => {
-      let db = firebase.firestore();
-      const getCollection = db.collection("links").orderBy("createdAt", "desc");
-      getCollection.onSnapshot(function (querysnapShot) {
-        const docs = querysnapShot.docs.map((doc) => doc.data());
-        setLinks(docs);
-        console.log(docs);
-      });
+
+    let db = firebase.firestore();
+    const getCollection = db.collection("links").orderBy("createdAt", "desc");
+    let unsub = getCollection.onSnapshot(function (querysnapShot) {
+      const docs = querysnapShot.docs.map((doc) => doc.data());
+      setLinks(docs);
+      console.log(docs);
+    });
+    return () => {
+      unsub();
     };
-    getLinks();
   }, []);
 
   //Adding link

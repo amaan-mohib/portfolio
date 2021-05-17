@@ -36,6 +36,9 @@ const about = "https://img.icons8.com/material-rounded/96/eeecec/user.png";
 const contact =
   "https://img.icons8.com/material-rounded/96/eeecec/phone--v1.png";
 
+// Initialize Firebase
+firebaseInit();
+
 ReactDOM.render(
   <React.StrictMode>
     <Paths />
@@ -69,12 +72,18 @@ function Paths() {
     );
   };
 
-  const withTitle = ({ ChildComp, title, desc }) => (props) => (
-    <>
-      <TitleComp title={title} desc={desc} />
-      <ChildComp {...props} />
-    </>
-  );
+  const withTitle =
+    ({ ChildComp, title, desc }) =>
+    (props) =>
+      (
+        <>
+          <TitleComp title={title} desc={desc} />
+          <ChildComp {...props} />
+        </>
+      );
+  const HomeComp = withTitle({
+    ChildComp: App,
+  });
   const LinksComp = withTitle({
     ChildComp: Links,
     desc: "Links shared by Amaan Mohib",
@@ -103,7 +112,7 @@ function Paths() {
   return (
     <Router history={history}>
       <Switch>
-        <Route path="/" exact component={App} />
+        <Route path="/" exact component={HomeComp} />
         <Route path="/links" exact component={LinksComp} />
         <Route path="/links/add" component={LinkAddComp} />
         <Route
@@ -233,9 +242,6 @@ function App() {
     </div>
   );
 }
-
-// Initialize Firebase
-firebaseInit();
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

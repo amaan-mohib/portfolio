@@ -132,16 +132,17 @@ export default function ProjectAdd(props) {
     fetchRepos();
 
     //Get projects in firestore
-    const getProjects = () => {
+
       let db = firebase.firestore();
       const getCollection = db.collection("projects");
-      getCollection.onSnapshot(function (querysnapShot) {
+      let unsub=getCollection.onSnapshot(function (querysnapShot) {
         const docs = querysnapShot.docs.map((doc) => doc.data());
         setAddedItems(docs);
         console.log(docs);
       });
-    };
-    getProjects();
+      return ()=>{
+        unsub();
+      }
   }, []);
   return (
     <div className="add-page">

@@ -19,6 +19,13 @@ var firebaseConfig = {
 export default function firebaseInit() {
   firebase.initializeApp(firebaseConfig);
   firebase.analytics();
+
+  //offline
+  firebase
+    .firestore()
+    .enablePersistence()
+    .then(() => console.log("persistence enabled"))
+    .catch((err) => console.error(err));
   console.log(firebase);
 }
 
