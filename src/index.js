@@ -35,6 +35,8 @@ const project =
 const about = "https://img.icons8.com/material-rounded/96/eeecec/user.png";
 const contact =
   "https://img.icons8.com/material-rounded/96/eeecec/phone--v1.png";
+const skills =
+  "https://img.icons8.com/material-rounded/96/eeecec/development-skill.png";
 
 // Initialize Firebase
 firebaseInit();
@@ -210,12 +212,18 @@ function App() {
       />
       <Section
         id="section3"
+        icon={<Logo icon={skills} />}
+        title="Skills"
+        content={<h1>Skills</h1>}
+      />
+      <Section
+        id="section4"
         icon={<Logo icon={about} />}
         title="About"
         content={<About />}
       />
       <Section
-        id="section4"
+        id="section5"
         icon={<Logo icon={contact} />}
         title="Contact"
         content={<Contact />}

@@ -1,10 +1,11 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useEffect, useRef, useState } from "react";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
 import {
   MdChevronLeft,
   MdChevronRight,
+  MdClose,
   MdEmail,
   MdLanguage,
 } from "react-icons/md";
@@ -19,16 +20,18 @@ import {
 import firebase from "firebase/app";
 import "./langColors.css";
 import analyze from "rgbaster";
-import { motion, useAnimation } from "framer-motion";
+import { AnimatePresence, motion, useAnimation } from "framer-motion";
 import {
   Card,
   CardContent,
   CardMedia,
   createMuiTheme,
+  IconButton,
   ThemeProvider,
   Typography,
 } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
+import ClickAwayListener from "./util/ClickAwayListener";
 
 export default function Section(props) {
   return (
@@ -119,13 +122,6 @@ export function Profile() {
     hidden: {},
     visible: {},
   };
-  const fadeOutVariants = {
-    hidden: {},
-    visible: {
-      opacity: 0,
-      transition: { duration: 1.5, ease: "easeOut" },
-    },
-  };
   const imgVariants = {
     hidden: {
       opacity: 0,
@@ -211,14 +207,6 @@ export function Profile() {
           Welcome to my portfolio!
         </motion.h2>
       </div>
-      <motion.div
-        id="first-slide"
-        className="first-slide"
-        variants={fadeOutVariants}
-        onAnimationComplete={() => {
-          const slide = document.getElementById("first-slide");
-          slide.style.display = "none";
-        }}></motion.div>
     </motion.div>
   );
 }
@@ -362,10 +350,19 @@ function Arrow(props) {
 }
 export function Project() {
   const [items, setItems] = useState([]);
+  const [dialog, setDialog] = useState(false);
   const [skeleton, setSkeleton] = useState(true);
-  const [count, setCount] = useState(0);
   const controls = useAnimation();
   const [ref, inView] = useInView();
+
+  const toggleDialog = () => {
+    setDialog(!dialog);
+    if (dialog) {
+      document.body.style.overflow = "auto";
+    } else {
+      document.body.style.overflow = "hidden";
+    }
+  };
   const boxVariants = {
     visible: {
       opacity: 1,
@@ -379,36 +376,32 @@ export function Project() {
   };
   useEffect(() => {
     let unsub;
+    setTimeout(() => {
+      const project = document.getElementById("project");
+      //Get projects in firestore
+      let db = firebase.firestore();
+      const getCollection = db.collection("projects").orderBy("index").limit(6);
+      unsub = getCollection.onSnapshot(function (querysnapShot) {
+        const docs = querysnapShot.docs.map((doc) => doc.data());
+        setItems(docs);
+        console.log(docs);
+        if (project.scrollHeight > project.offsetHeight) {
+          project.style.justifyContent = "space-between";
+        }
+      });
+      setSkeleton(false);
+    }, 3500);
+    return () => {
+      unsub && unsub();
+    };
+  }, []);
+  useEffect(() => {
     if (inView) {
       controls.start("visible");
     } else {
       controls.start("hidden");
     }
-    setTimeout(() => {
-      const project = document.getElementById("project");
-      //Get projects in firestore
-      const getProjects = () => {
-        let db = firebase.firestore();
-        const getCollection = db.collection("projects");
-        unsub = getCollection.onSnapshot(function (querysnapShot) {
-          const docs = querysnapShot.docs.map((doc) => doc.data());
-          setItems(docs);
-          setCount(1);
-          console.log(docs);
-          if (project.scrollHeight > project.offsetHeight) {
-            project.style.justifyContent = "space-between";
-          }
-        });
-        setSkeleton(false);
-      };
-      if (count === 0) {
-        getProjects();
-      }
-    }, 3500);
-    return () => {
-      unsub && unsub();
-    };
-  }, [inView, controls, count]);
+  }, [inView, controls]);
   const cards = items.map((item) => {
     return <MyCardContent key={item.name} item={item} />;
   });
@@ -435,16 +428,98 @@ export function Project() {
       <div className="gridContainer">{cards}</div>
       <div className="slider">{slider}</div>
       {skeleton && <CardSkeleton />}
-      <a
-        href="https://github.com/amaan-mohib"
-        rel="noopener noreferrer"
-        target="_blank"
+      <button
+        onClick={() => {
+          toggleDialog();
+        }}
         className="github">
         View more
-      </a>
+      </button>
+      <AnimatePresence
+        // Disable any initial animations on children that
+        // are present when the component is first rendered
+        initial={false}
+        // Only render one component at a time.
+        // The exiting component will finish its exit
+        // animation before entering component is rendered
+        exitBeforeEnter={true}
+        // Fires when all exiting nodes have completed animating out
+        onExitComplete={() => null}>
+        {dialog && <ProjectDialog toggleDialog={toggleDialog} />}
+      </AnimatePresence>
+      <div className="scroll-to-view">
+        <p>Scroll to view more</p>
+        <img
+          alt="double-down"
+          src="https://img.icons8.com/material-rounded/24/a1a1a1/double-down.png"
+        />
+      </div>
     </motion.div>
   );
 }
+
+const ProjectDialog = ({ toggleDialog }) => {
+  const ref = useRef(null);
+  const [projects, setProjects] = useState([]);
+  const [skeleton, setSkeleton] = useState(true);
+  ClickAwayListener(ref, toggleDialog);
+  useEffect(() => {
+    let db = firebase.firestore();
+    db.collection("projects")
+      .where("index", ">", 5)
+      .orderBy("index")
+      .get()
+      .then((ss) => {
+        const docs = ss.docs.map((doc) => doc.data());
+        setSkeleton(false);
+        setProjects(docs);
+      })
+      .catch((e) => console.error(e));
+  }, []);
+  return (
+    <>
+      <motion.div
+        className="backdrop"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}>
+        <motion.div
+          ref={ref}
+          className="dialog"
+          initial={{ opacity: 0, scale: 0.75 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0 }}>
+          <div className="project-title">
+            <h2>Projects</h2>
+            <IconButton onClick={toggleDialog} title="Close">
+              <MdClose color="white" />
+            </IconButton>
+          </div>
+          <div className="project-content">
+            <div className="gridContainer" style={{ display: "grid" }}>
+              {projects.map((item) => (
+                <MyCardContent key={item.name} item={item} />
+              ))}
+            </div>
+            <div style={{ padding: "10px" }}>
+              {skeleton && <CardSkeleton />}
+            </div>
+          </div>
+          <div className="project-end">
+            <a
+              href="https://github.com/amaan-mohib"
+              rel="noopener noreferrer"
+              target="_blank"
+              className="github">
+              Visit GitHub
+            </a>
+          </div>
+        </motion.div>
+      </motion.div>
+    </>
+  );
+};
+
 function MyCardContent(props) {
   const [icon, setIcon] = useState(<div></div>);
   const [banner, setBanner] = useState("");
@@ -578,9 +653,11 @@ export function Scroll(props) {
         <p id="t2"></p>
         <p id="t3"></p>
         <p id="t4"></p>
+        <p id="t5"></p>
       </div>
       <div>
         <button className="scrollBut active"></button>
+        <button className="scrollBut"></button>
         <button className="scrollBut"></button>
         <button className="scrollBut"></button>
         <button className="scrollBut"></button>

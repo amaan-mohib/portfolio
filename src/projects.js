@@ -23,6 +23,9 @@ import {
   MdDelete,
   MdHome,
   MdAttachment,
+  MdDateRange,
+  MdArrowUpward,
+  MdArrowDownward,
 } from "react-icons/md";
 import {
   Card,
@@ -74,6 +77,7 @@ export default function ProjectAdd(props) {
   const [gitAvatar, setGitAvatar] = useState("");
   const [login, setLogin] = useState("");
   const [open, setOpen] = useState(true);
+  const [save, setSave] = useState(false);
   const classes = useStyles();
   function Msg() {
     if (props.msg) {
@@ -101,6 +105,43 @@ export default function ProjectAdd(props) {
       );
     } else return <div></div>;
   }
+  const handleMove = (id, direction) => {
+    const items = addedItems;
+    const position = items.findIndex((i) => i.name === id);
+    if (position < 0) {
+      console.error("Given item not found.");
+      return;
+    } else if (
+      (direction === -1 && position === 0) ||
+      (direction === 1 && position === items.length - 1)
+    ) {
+      return; // canot move outside of array
+    }
+    const item = items[position]; // save item for later
+    const newItems = items.filter((i) => i.name !== id); // remove item from array
+    newItems.splice(position + direction, 0, item);
+    newItems.forEach((item, index) => {
+      item.index = index;
+    });
+    if (newItems !== addedItems) {
+      setSave(true);
+    }
+    setAddedItems(newItems);
+  };
+
+  const updateIndex = (items = []) => {
+    let db = firebase.firestore();
+    const batch = db.batch();
+    items.forEach((item) => {
+      let docRef = db.collection("projects").doc(item.id);
+      batch.update(docRef, { index: item.index });
+    });
+    batch
+      .commit()
+      .then(() => console.log("index updated"))
+      .catch((e) => console.error(e));
+  };
+
   useEffect(() => {
     setTimeout(() => {
       let user = firebase.auth().currentUser;
@@ -133,16 +174,16 @@ export default function ProjectAdd(props) {
 
     //Get projects in firestore
 
-      let db = firebase.firestore();
-      const getCollection = db.collection("projects");
-      let unsub=getCollection.onSnapshot(function (querysnapShot) {
-        const docs = querysnapShot.docs.map((doc) => doc.data());
-        setAddedItems(docs);
-        console.log(docs);
-      });
-      return ()=>{
-        unsub();
-      }
+    let db = firebase.firestore();
+    const getCollection = db.collection("projects").orderBy("index");
+    let unsub = getCollection.onSnapshot(function (querysnapShot) {
+      const docs = querysnapShot.docs.map((doc) => doc.data());
+      setAddedItems(docs);
+      console.log(docs);
+    });
+    return () => {
+      unsub();
+    };
   }, []);
   return (
     <div className="add-page">
@@ -213,6 +254,7 @@ export default function ProjectAdd(props) {
                       item={item}
                       key={item.id}
                       id={item.id}
+                      length={addedItems.length}
                       buttons="add"
                     />
                   );
@@ -225,23 +267,42 @@ export default function ProjectAdd(props) {
               <List
                 component="div"
                 subheader={
-                  <ListSubheader
-                    key="addedTitlesHeader"
-                    component="div"
-                    disableSticky>
-                    Added Titles
-                  </ListSubheader>
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    {save && (
+                      <ListItemIcon>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={() => {
+                            updateIndex(addedItems);
+                          }}
+                          style={{ marginLeft: "10px" }}>
+                          Save
+                        </Button>
+                      </ListItemIcon>
+                    )}
+                    <ListSubheader
+                      key="addedTitlesHeader"
+                      component="div"
+                      disableSticky>
+                      Added Titles
+                    </ListSubheader>
+                  </div>
                 }
                 className={classes.root}>
                 <Divider />
                 {addedItems.map((item, index) => {
                   return (
-                    <TitleList
-                      item={item}
-                      key={index}
-                      id={index}
-                      buttons="edit"
-                    />
+                    <>
+                      <TitleList
+                        item={item}
+                        key={index}
+                        id={index}
+                        buttons="edit"
+                        onMove={handleMove}
+                      />
+                      {index === 5 && <Divider />}
+                    </>
                   );
                 })}
               </List>
@@ -258,27 +319,50 @@ function TitleList(props) {
   const handleClick = () => {
     setOpen(!open);
   };
+
   return (
-    <div key={props.id}>
-      <ListItem
-        key={props.item.name + "-" + props.id}
-        button
-        onClick={handleClick}>
-        <ListItemText
-          key={props.item.name + "-item-" + props.id}
-          primary={props.item.name}
-        />
-        {open ? <MdExpandLess size={24} /> : <MdExpandMore size={24} />}
-      </ListItem>
-      <Collapse key={props.id} in={open} unmountOnExit timeout="auto">
-        <Divider key="d1" />
-        {props.buttons === "add" ? (
-          <TitleNameList id={props.id} item={props.item} />
-        ) : (
-          <AddedTitles id={props.id} item={props.item} />
-        )}
-        <Divider key="d2" />
-      </Collapse>
+    <div key={props.id} style={{ display: "flex", alignItems: "center" }}>
+      <div style={{ width: "100%" }}>
+        <ListItem
+          key={props.item.name + "-" + props.id}
+          button
+          onClick={handleClick}>
+          <ListItemText
+            key={props.item.name + "-item-" + props.id}
+            primary={props.item.name}
+          />
+          {open ? <MdExpandLess size={24} /> : <MdExpandMore size={24} />}
+        </ListItem>
+        <Collapse key={props.id} in={open} unmountOnExit timeout="auto">
+          <Divider key="d1" />
+          {props.buttons === "add" ? (
+            <TitleNameList
+              id={props.id}
+              item={props.item}
+              length={props.length}
+            />
+          ) : (
+            <AddedTitles id={props.id} item={props.item} />
+          )}
+          <Divider key="d2" />
+        </Collapse>
+      </div>
+      {props.buttons === "edit" && !open && (
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <IconButton
+            onClick={() => {
+              props.onMove(props.item.name, -1);
+            }}>
+            <MdArrowUpward />
+          </IconButton>
+          <IconButton
+            onClick={() => {
+              props.onMove(props.item.name, 1);
+            }}>
+            <MdArrowDownward />
+          </IconButton>
+        </div>
+      )}
     </div>
   );
 }
@@ -308,7 +392,7 @@ function TitleNameList(props) {
         </ListItemIcon>
         <ListItemText primary={props.item.language} />
       </ListItem>
-      <Add item={props.item} />
+      <Add item={props.item} length={props.length} />
     </List>
   );
 }
@@ -344,6 +428,16 @@ function AddedTitles(props) {
             </ListItemIcon>
             <ListItemText primary={props.item.language} />
           </ListItem>
+          <ListItem key="23">
+            <ListItemIcon>
+              <MdDateRange size={24} />
+            </ListItemIcon>
+            <ListItemText
+              primary={`${
+                props.item.createdAt ? new Date(props.item.createdAt) : ""
+              }`}
+            />
+          </ListItem>
         </List>
       </CardContent>
       <Edit item={props.item} />
@@ -374,16 +468,21 @@ function Add(props) {
         setOpen2(true);
       } else {
         docRef
-          .set({
-            id: item.name,
-            name: item.name,
-            description: item.description,
-            html_url: item.html_url,
-            image: "https://amaan-mohib.github.io/assets/img/movie_icon.png",
-            language: item.language,
-            type: "repo",
-            img_type: "banner",
-          })
+          .set(
+            {
+              id: item.name,
+              index: props.length,
+              name: item.name,
+              description: item.description,
+              html_url: item.html_url,
+              image: "https://amaan-mohib.github.io/assets/img/movie_icon.png",
+              language: item.language,
+              type: "repo",
+              img_type: "banner",
+              createdAt: item.created_at,
+            },
+            { merge: true }
+          )
           .then(function () {
             handleClick();
           });
@@ -529,16 +628,18 @@ const Form = forwardRef((props, ref) => {
     let docRef = db.collection("projects").doc(`${item.name}`);
 
     docRef
-      .set({
-        id: item.name,
-        name: value.name,
-        description: value.desc,
-        html_url: value.link,
-        image: value.img,
-        language: value.lang,
-        type: value.linkType,
-        img_type: value.imgType,
-      })
+      .set(
+        {
+          name: value.name,
+          description: value.desc,
+          html_url: value.link,
+          image: value.img,
+          language: value.lang,
+          type: value.linkType,
+          img_type: value.imgType,
+        },
+        { merge: true }
+      )
       .then(function () {
         setOpen2(true);
       });
