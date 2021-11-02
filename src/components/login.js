@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { firebaseUI } from "./firebase";
+import { firebaseUI } from "../util/firebase";
 
 export default function Login() {
   useEffect(() => {

@@ -10,7 +10,7 @@ import ListItem from "@material-ui/core/ListItem";
 import Divider from "@material-ui/core/Divider";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
-import { userSignedIn, signOut } from "./firebase";
+import { userSignedIn, signOut } from "../util/firebase";
 import {
   MdExpandLess,
   MdExpandMore,
@@ -44,7 +44,7 @@ import {
   TextField,
 } from "@material-ui/core";
 import { Alert } from "@material-ui/lab";
-import history from "./history";
+import history from "../util/history";
 import { forwardRef } from "react";
 import { useImperativeHandle } from "react";
 import { useRef } from "react";

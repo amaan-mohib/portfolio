@@ -13,7 +13,7 @@ import {
   MdLink,
 } from "react-icons/md";
 import { Link } from "react-router-dom";
-import { signOut, userSignedIn } from "./firebase";
+import { signOut, userSignedIn } from "../util/firebase";
 import { ContactButton } from "./section";
 
 export default function Links() {

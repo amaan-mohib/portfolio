@@ -18,7 +18,7 @@ import {
   FaYoutube,
 } from "react-icons/fa";
 import firebase from "firebase/app";
-import "./langColors.css";
+import "../langColors.css";
 import analyze from "rgbaster";
 import { AnimatePresence, motion, useAnimation } from "framer-motion";
 import {
@@ -31,7 +31,7 @@ import {
   Typography,
 } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
-import ClickAwayListener from "./util/ClickAwayListener";
+import ClickAwayListener from "../util/ClickAwayListener";
 
 export default function Section(props) {
   return (
@@ -526,8 +526,6 @@ function MyCardContent(props) {
   const [color, setColor] = useState("");
   const [button, setButton] = useState(<div></div>);
   useEffect(() => {
-    const lang = document.getElementById("lang");
-    lang.style.backgroundColor = props.item.language;
     const getColor = async (item) => {
       if (!item.color) {
         const result = await analyze(item.image, {

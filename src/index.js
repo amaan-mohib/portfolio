@@ -1,15 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import ReactDOM from "react-dom";
 import { Helmet } from "react-helmet";
-import {
-  BrowserRouter as Router,
-  Link,
-  Redirect,
-  Route,
-  Switch,
-} from "react-router-dom";
-import firebase from "firebase/app";
-import firebaseInit, { userSignedIn } from "./firebase";
+import { Router, Link, Route, Switch } from "react-router-dom";
+import firebaseInit, { userSignedIn } from "./util/firebase";
 import "./index.css";
 import logo from "./logo_white_bold.png";
 import * as serviceWorker from "./serviceWorker";
@@ -20,15 +13,17 @@ import Section, {
   Contact,
   Profile,
   Scroll,
-} from "./section";
-import Login from "./login";
-import ProjectAdd from "./projects";
-import history from "./history";
+} from "./components/section";
+import Login from "./components/login";
+import ProjectAdd from "./components/projects";
+import history from "./util/history";
 import { useRef } from "react";
-import Links, { LinkAdd } from "./links";
-import NotFound from "./NotFound";
+import Links, { LinkAdd } from "./components/links";
+import NotFound from "./components/NotFound";
 import { MdAttachment, MdFolder, MdLink } from "react-icons/md";
 import { IconButton } from "@material-ui/core";
+import PrivateRoute from "./components/PrivateRoute";
+import Skills from "./components/Skills";
 
 const project =
   "https://img.icons8.com/material-rounded/96/eeecec/folder-invoices.png";
@@ -49,16 +44,6 @@ ReactDOM.render(
 );
 
 function Paths() {
-  const [signIn, setSignIn] = useState(false);
-  useEffect(() => {
-    setTimeout(() => {
-      firebase.auth().onAuthStateChanged((user) => {
-        if (user) setSignIn(true);
-        else setSignIn(false);
-      });
-    }, 1000);
-  }, []);
-
   const TitleComp = ({ title, desc }) => {
     const defaultTitle = "Amaan Mohib";
     const defaultDesc = "Amaan Mohib's personal website.";
@@ -121,18 +106,7 @@ function Paths() {
           path="/projects"
           render={(props) => <ProjectsComp msg={props.location.state} />}
         />
-        <Route
-          path="/login"
-          render={() =>
-            !signIn ? (
-              <LoginComp />
-            ) : (
-              <Redirect
-                to={{ pathname: "/projects", state: "Already logged in" }}
-              />
-            )
-          }
-        />
+        <PrivateRoute component={LoginComp} />
         <Route path="*" component={NFComp} />
       </Switch>
     </Router>
@@ -212,15 +186,15 @@ function App() {
       />
       <Section
         id="section3"
-        icon={<Logo icon={skills} />}
-        title="Skills"
-        content={<h1>Skills</h1>}
-      />
-      <Section
-        id="section4"
         icon={<Logo icon={about} />}
         title="About"
         content={<About />}
+      />
+      <Section
+        id="section4"
+        icon={<Logo icon={skills} />}
+        title="Skills"
+        content={<Skills />}
       />
       <Section
         id="section5"
