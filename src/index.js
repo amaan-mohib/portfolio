@@ -4,7 +4,7 @@ import { Helmet } from "react-helmet";
 import { Router, Link, Route, Switch } from "react-router-dom";
 import firebaseInit, { userSignedIn } from "./util/firebase";
 import "./index.css";
-import logo from "./logo_white_bold.png";
+import logo from "./assets/logo_white_bold.png";
 import * as serviceWorker from "./serviceWorker";
 import Section, {
   Logo,
