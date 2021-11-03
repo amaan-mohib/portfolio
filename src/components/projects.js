@@ -138,7 +138,10 @@ export default function ProjectAdd(props) {
     });
     batch
       .commit()
-      .then(() => console.log("index updated"))
+      .then(() => {
+        console.log("index updated");
+        setSave(false);
+      })
       .catch((e) => console.error(e));
   };
 
@@ -642,6 +645,7 @@ const Form = forwardRef((props, ref) => {
       )
       .then(function () {
         setOpen2(true);
+        setOpen(false);
       });
   };
   return (

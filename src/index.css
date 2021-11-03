@@ -881,6 +881,10 @@ footer {
   .project {
     height: auto;
   }
+  .illustration,
+  .scroll-to-view {
+    display: none;
+  }
 }
 @media (orientation: landscape) and (pointer: coarse) {
   .contactFull,

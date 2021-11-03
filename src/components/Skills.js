@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import "./skills.css";
 import { IconButton } from "@material-ui/core";
-import { MdClose } from "react-icons/md";
+import { MdClose, MdKeyboardArrowUp } from "react-icons/md";
 import ClickAwayListener from "../util/ClickAwayListener";
 import { AnimatePresence, motion } from "framer-motion";
 import illustration from "../assets/undraw_coding.svg";
@@ -9,6 +9,7 @@ import illustration from "../assets/undraw_coding.svg";
 const Skills = () => {
   const [subList, setSubList] = useState(null);
   const [title, setTitle] = useState("");
+  const ref = useRef(null);
   const web = [
     {
       name: "HTML",
@@ -187,6 +188,15 @@ const Skills = () => {
             onClick={() => {
               setSubList(item.child);
               setTitle(item.name);
+              setTimeout(() => {
+                ref.current.style.margin = "10px";
+                ref.current.scrollIntoView({
+                  behavior: "smooth",
+                  block: "nearest",
+                  inline: "start",
+                });
+                ref.current.style.margin = "0px";
+              }, 100);
             }}>
             <div
               style={{
@@ -200,20 +210,29 @@ const Skills = () => {
           </div>
         ))}
       </div>
-      {subList ? (
-        <SubGrid
-          list={subList}
-          title={title}
-          setSubList={setSubList}
-          setTitle={setTitle}
-        />
-      ) : (
-        <div
-          className="illustration"
-          style={{
-            backgroundImage: `url(${illustration})`,
-          }}></div>
-      )}
+      <AnimatePresence
+        initial={false}
+        exitBeforeEnter={true}
+        onExitComplete={() => null}>
+        {subList ? (
+          <SubGrid
+            list={subList}
+            title={title}
+            setSubList={setSubList}
+            setTitle={setTitle}
+          />
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="illustration"
+            style={{
+              backgroundImage: `url(${illustration})`,
+            }}></motion.div>
+        )}
+      </AnimatePresence>
+      <div ref={ref}></div>
     </div>
   );
 };
@@ -231,7 +250,11 @@ const SubGrid = ({ list, title, setSubList, setTitle }) => {
   };
   return (
     <>
-      <div
+      <motion.div
+        key={title || "empty"}
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 20 }}
         className="skills grid-inside"
         style={{ padding: 0, justifyContent: "space-between" }}>
         <div className="skills-title">
@@ -242,7 +265,7 @@ const SubGrid = ({ list, title, setSubList, setTitle }) => {
               setSubList(null);
               setTitle("");
             }}>
-            <MdClose color="white" />
+            <MdKeyboardArrowUp color="white" />
           </IconButton>
         </div>
         <div
@@ -251,35 +274,33 @@ const SubGrid = ({ list, title, setSubList, setTitle }) => {
             height: "100%",
           }}>
           {list.map((item) => (
-            <>
+            <div
+              key={item.name}
+              className="skill"
+              onClick={() => {
+                if (item.child) {
+                  setItem(item);
+                  toggleDialog();
+                }
+              }}>
               <div
-                key={item.name}
-                className="skill"
-                onClick={() => {
-                  if (item.child) {
-                    setItem(item);
-                    toggleDialog();
-                  }
-                }}>
-                <div
-                  style={{
-                    backgroundImage: `url(${item.icon})`,
-                    width: "48px",
-                    height: "48px",
-                    padding: "3px",
-                    backgroundOrigin: "content-box",
-                    backgroundRepeat: "no-repeat",
-                    backgroundSize: "contain",
-                  }}
-                />
-                <p>{item.name}</p>
-                {item.child && <div className="childIndicator"></div>}
-              </div>
-            </>
+                style={{
+                  backgroundImage: `url(${item.icon})`,
+                  width: "48px",
+                  height: "48px",
+                  padding: "3px",
+                  backgroundOrigin: "content-box",
+                  backgroundRepeat: "no-repeat",
+                  backgroundSize: "contain",
+                }}
+              />
+              <p>{item.name}</p>
+              {item.child && <div className="childIndicator"></div>}
+            </div>
           ))}
         </div>
         <div></div>
-      </div>
+      </motion.div>
       <AnimatePresence
         initial={false}
         exitBeforeEnter={true}
