@@ -170,6 +170,12 @@ function App() {
     }, 1000);
   }, []);
 
+  useEffect(() => {
+    if (window) {
+      window.location.href = "https://amaan-mohib.net";
+    }
+  }, []);
+
   return (
     <div className="container">
       <Section
